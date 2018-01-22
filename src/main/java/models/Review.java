@@ -9,6 +9,13 @@ public class Review {
     private int restaurantId; //i will be used to connect Restaurant to Review.
     private String content;
 
+    public Review(String writtenBy, int rating, String content, int restaurantId) {
+        this.writtenBy = writtenBy;
+        this.rating = rating;
+        this.restaurantId = restaurantId;
+        this.content = content;
+    }
+
     public String getWrittenBy() {
         return writtenBy;
     }
