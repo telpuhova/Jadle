@@ -2,7 +2,7 @@
 
 #### _web application, 1/21/2018_
 
-#### By _**telpuhova**_
+#### By _**telpuhova & katetrahan**_
 
 ## Description
 
@@ -17,4 +17,4 @@ _a Yelp clone._
 
 _Java, Spark, Postgres, Handlebars_
 
-Copyright (c) 2017 **_telpuhova_**
+Copyright (c) 2017 **_telpuhova & katetrahan_**

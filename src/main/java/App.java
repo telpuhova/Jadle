@@ -3,11 +3,14 @@ import com.google.gson.Gson;
 import dao.Sql2oFoodtypeDao;
 import dao.Sql2oRestaurantDao;
 import dao.Sql2oReviewDao;
+import exceptions.ApiException;
 import models.*;
 import org.sql2o.Connection;
 import org.sql2o.Sql2o;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static spark.Spark.*;
 
@@ -45,6 +48,13 @@ public class App {
 
         get("/restaurants/:id", "application/json", (req, res) -> {
             int restaurantId = Integer.parseInt(req.params("id"));
+
+            Restaurant restaurantToFind = restaurantDao.findById(restaurantId);
+
+            if (restaurantToFind == null) {
+                throw new ApiException(404, String.format("No restaurant with the id: \"%s\" exists", req.params("id")));
+            }
+
             return gson.toJson(restaurantDao.findById(restaurantId));
         });
 
@@ -82,8 +92,11 @@ public class App {
 
         //Reviews
 
-        post("/reviews/new", "application/json", (req, res) -> {
+
+        post("restaurants/:restaurantId/reviews/new", "application/json", (req, res) -> {
+            int restaurantId =Integer.parseInt(req.params("restaurantId"));
             Review review = gson.fromJson(req.body(), Review.class);
+            review.setRestaurantId(restaurantId);
             reviewDao.add(review);
             res.status(201);
             return gson.toJson(review);
@@ -94,7 +107,7 @@ public class App {
             return gson.toJson(reviewDao.getAll());
         });
 
-        get("/reviews/restaurant/:id", "application/json", (request, response) -> {
+        get("/restaurant/:id/reviews", "application/json", (request, response) -> {
             int restaurantId = Integer.parseInt(request.params("id"));
 
             Restaurant restaurant = restaurantDao.findById(restaurantId);
@@ -113,9 +126,24 @@ public class App {
         get("/foodtypes/:id/delete", "application/json", (request, response) -> {
             int foodtypeId = Integer.parseInt(request.params("id"));
             foodtypeDao.deleteById(foodtypeId);
-            String str = "success";g
+            String str = "success";
             return gson.toJson(str);
         });
+
+
+
+        //exception
+        exception(ApiException.class, (exc, req, res) -> {
+            ApiException err = (ApiException) exc;
+            Map<String, Object> jsonMap = new HashMap<>();
+            jsonMap.put("status", err.getStatusCode());
+            jsonMap.put("errorMessage", err.getMessage());
+            res.type("application/json");
+            res.status(err.getStatusCode());
+            res.body(gson.toJson(jsonMap));
+        });
+
+
 
 
         //Filters
