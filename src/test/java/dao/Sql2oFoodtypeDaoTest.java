@@ -1,6 +1,8 @@
 package dao;
 
+import com.sun.org.apache.regexp.internal.RE;
 import models.Foodtype;
+import models.Restaurant;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,6 +17,7 @@ public class Sql2oFoodtypeDaoTest {
     Connection con;
     Sql2o sql2o;
     Sql2oFoodtypeDao foodtypeDao;
+    Sql2oRestaurantDao restaurantDao;
 
 
     @Before
@@ -22,6 +25,7 @@ public class Sql2oFoodtypeDaoTest {
         String connectionString = "jdbc:h2:mem:testing;INIT=RUNSCRIPT from 'classpath:db/create.sql'";
         sql2o = new Sql2o(connectionString, "", "");
         foodtypeDao = new Sql2oFoodtypeDao(sql2o);
+        restaurantDao = new Sql2oRestaurantDao(sql2o);
         con = sql2o.open();
     }
 
@@ -57,7 +61,47 @@ public class Sql2oFoodtypeDaoTest {
         assertEquals(0, foodtypeDao.getAll().size());
     }
 
+    @Test
+    public void addFoodTypeToRestaurant() throws Exception {
+        Restaurant testRestaurant = setupRestaurant();
+        Restaurant altRestaurant = setupRestaurant();
+
+        restaurantDao.add(testRestaurant);
+        restaurantDao.add(altRestaurant);
+
+        Foodtype testFoodtype = setupFoodtype();
+
+        foodtypeDao.add(testFoodtype);
+
+        foodtypeDao.addFoodtypeToRestaurant(testFoodtype, testRestaurant);
+        foodtypeDao.addFoodtypeToRestaurant(testFoodtype, altRestaurant);
+
+        assertEquals(2, foodtypeDao.getAllRestaurantsForAFoodtype(testFoodtype.getId()).size());
+    }
+
+    @Test
+    public void delete_updatesJoinTable() throws Exception {
+        Foodtype foodtype1 = new Foodtype("Seafood");
+        foodtypeDao.add(foodtype1);
+
+        Restaurant restaurant1 = setupRestaurant();
+        restaurantDao.add(restaurant1);
+
+        Restaurant restaurant2 = setupRestaurant();
+        restaurantDao.add(restaurant2);
+
+        restaurantDao.addRestaurantToFoodtype(restaurant1, foodtype1);
+        restaurantDao.addRestaurantToFoodtype(restaurant2, foodtype1);
+
+        restaurantDao.deleteById(restaurant1.getId());
+        assertEquals(0, restaurantDao.getAllFoodtypesForARestaurant(restaurant1.getId()).size());
+    }
+
     public Foodtype setupFoodtype(){
         return new Foodtype("breakfast");
+    }
+
+    public Restaurant setupRestaurant(){
+        return new Restaurant("taco bell", "1234 ne some street, Portland, OR", "1234", "12345678", "website.com", "email@mail.com");
     }
 }
