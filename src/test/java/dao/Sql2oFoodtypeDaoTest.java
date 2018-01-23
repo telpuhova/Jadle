@@ -97,6 +97,17 @@ public class Sql2oFoodtypeDaoTest {
         assertEquals(0, restaurantDao.getAllFoodtypesForARestaurant(restaurant1.getId()).size());
     }
 
+    @Test
+    public void findById() throws Exception {
+        Foodtype foodtype1 = new Foodtype("Seafood");
+        foodtypeDao.add(foodtype1);
+
+        Foodtype foodtype2 = new Foodtype("Italian");
+        foodtypeDao.add(foodtype2);
+
+        assertEquals(foodtype2, foodtypeDao.findById(2));
+    }
+
     public Foodtype setupFoodtype(){
         return new Foodtype("breakfast");
     }
