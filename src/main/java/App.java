@@ -125,6 +125,8 @@ public class App {
         post("restaurants/:restaurantId/reviews/new", "application/json", (req, res) -> {
             int restaurantId =Integer.parseInt(req.params("restaurantId"));
             Review review = gson.fromJson(req.body(), Review.class);
+            review.setCreatedat();
+            review.setFormattedCreatedAt();
             review.setRestaurantId(restaurantId);
             reviewDao.add(review);
             res.status(201);
@@ -144,6 +146,17 @@ public class App {
 
             return gson.toJson(reviews);
 
+        });
+
+        get("/restaurants/:id/sortedReviews", "application/json", (req,res) -> {
+            int restaurantId = Integer.parseInt(req.params("id"));
+            Restaurant restaurantToFind = restaurantDao.findById(restaurantId);
+            List<Review> allReviews;
+            if (restaurantToFind == null){
+                throw new ApiException(404, String.format("No restaurant with the id: \"%s\" exists", restaurantId));
+            }
+            allReviews = reviewDao.getAllReviewsByRestaurantSortedNewestToOldest(restaurantId);
+            return gson.toJson(allReviews);
         });
 
         get("reviews/:id/delete", "application/json", (req, res) -> {
