@@ -71,20 +71,49 @@ public class App {
             return gson.toJson(foodtypeDao.getAll());
         });
 
-        get("/restaurant/:id/foodtype/:foodtypeId", "application/json", (request, response) -> {
+        post("/restaurant/:id/foodtype/:foodtypeId", "application/json", (request, response) -> {
             int restaurantId = Integer.parseInt(request.params("id"));
             int foodtypeId = Integer.parseInt(request.params("foodtypeId"));
 
             Restaurant restaurant = restaurantDao.findById(restaurantId);
             Foodtype foodtype = foodtypeDao.findById(foodtypeId);
-            foodtypeDao.addFoodtypeToRestaurant(foodtype, restaurant);
-            return gson.toJson(restaurant);
+
+            if (restaurant != null && foodtype != null) {
+                foodtypeDao.addFoodtypeToRestaurant(foodtype,restaurant);
+                response.status(201);
+                return gson.toJson(String.format("Restaurant '%s' and FoodType '%s' have been associated", foodtype.getName(),restaurant.getName()));
+            }
+            else {
+                throw new ApiException(404,String.format("Restaurant or Foodtype does not exist"));
+            }
 
         });
 
-        get("/restaurants/foodtypes/:foodtypeId", "application/json", (req, res) -> {
-            int foodtypeId = Integer.parseInt(req.params("foodtypeId"));
-            return gson.toJson(foodtypeDao.getAllRestaurantsForAFoodtype(foodtypeId));
+        get("/foodtypes/:id/restaurants", "application/json", (req, res) -> {
+            int foodtypeId = Integer.parseInt(req.params("id"));
+            Foodtype foodtype = foodtypeDao.findById(foodtypeId);
+            if (foodtype == null) {
+                throw new ApiException(404, String.format("No foodtype with the id: %s exists", req.params("id")));
+            }
+            else if (foodtypeDao.getAllRestaurantsForAFoodtype(foodtypeId).size()==0){
+                return "{\"message\":\"I'm sorry, but no restaurants are listed for this foodtype.\"}";
+            }
+            else {
+                return gson.toJson(foodtypeDao.getAllRestaurantsForAFoodtype(foodtypeId));
+            }
+        });
+
+        get("/restaurants/:id/foodtypes", "application/json", (request, response) -> {
+            int restaurantId = Integer.parseInt(request.params("id"));
+            Restaurant restaurantToFind = restaurantDao.findById(restaurantId);
+            if (restaurantToFind == null) {
+                throw new ApiException(404, String.format("No restaurant with the id: %s exists", request.params("id")));
+            } else if (restaurantDao.getAllFoodtypesForARestaurant(restaurantId).size()==0){
+                return "{\"message\":\"I'm sorry, but no foodtyes are listed for this restaurant.\"}";
+            }
+            else {
+                return gson.toJson(restaurantDao.getAllFoodtypesForARestaurant(restaurantId));
+            }
         });
 
 

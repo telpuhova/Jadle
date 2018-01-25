@@ -8,6 +8,8 @@ import org.junit.Test;
 import org.sql2o.Connection;
 import org.sql2o.Sql2o;
 
+import java.util.List;
+
 import static org.junit.Assert.*;
 
 
@@ -57,6 +59,42 @@ public class Sql2oReviewDaoTest {
 
         assertEquals(2, reviewDao.getAllReviewsByRestaurant(testRestaurant.getId()).size());
         assertEquals(0, reviewDao.getAllReviewsByRestaurant(newRestaurant.getId()).size());
+    }
+
+    @Test
+    public void timeStampIsReturnedCorrectly() throws Exception {
+        Restaurant testRestaurant = setupRestaurant();
+        restaurantDao.add(testRestaurant);
+        Review testReview = new Review("Captain Kirk", 3, "foodcoma!", testRestaurant.getId());
+        reviewDao.add(testReview);
+
+        long creationTime = testReview.getCreatedat();
+        long savedTime = reviewDao.getAll().get(0).getCreatedat();
+        String formattedCreationTime = testReview.getFormattedCreatedAt();
+        String formattedSavedTime = reviewDao.getAll().get(0).getFormattedCreatedAt();
+        assertEquals(formattedCreationTime, formattedSavedTime);
+        assertEquals(creationTime, reviewDao.getAll().get(0).getCreatedat());
+    }
+
+    @Test
+    public void reviewsAreReturnedInCorrectOrder() throws Exception {
+        Restaurant testRestaurant = setupRestaurant();
+        restaurantDao.add(testRestaurant);
+        Review testReview = new Review("Captain Kirk", 3, "foodcome!", testRestaurant.getId());
+        reviewDao.add(testReview);
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException ex) {
+            ex.printStackTrace();
+        }
+
+        Review testSecondReview = new Review("mike", 1, "passable", testRestaurant.getId());
+        reviewDao.add(testSecondReview);
+
+        List<Review> sorted = reviewDao.getAllReviewsByRestaurantSortedNewestToOldest(testRestaurant.getId());
+
+        assertEquals("passable", sorted.get(0).getContent());
+
     }
 
 

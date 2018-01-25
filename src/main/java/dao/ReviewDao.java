@@ -15,6 +15,8 @@ public interface ReviewDao {
 
     List<Review> getAllReviewsByRestaurant(int restaurantId);
 
+    List<Review> getAllReviewsByRestaurantSortedNewestToOldest (int restaurantId);
+
     //update
 
     //delete

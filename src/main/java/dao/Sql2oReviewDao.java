@@ -5,6 +5,8 @@ import models.Review;
 import org.sql2o.Connection;
 import org.sql2o.Sql2o;
 import org.sql2o.Sql2oException;
+
+import java.util.Collections;
 import java.util.List;
 
 public class Sql2oReviewDao implements ReviewDao{
@@ -17,7 +19,7 @@ public class Sql2oReviewDao implements ReviewDao{
 
     @Override
     public void add(Review review){
-        String sql = "INSERT INTO reviews (writtenBy, rating, restaurantId, content) VALUES (:writtenBy, :rating, :restaurantId, :content)";
+        String sql = "INSERT INTO reviews (writtenBy, rating, restaurantId, content, createdat) VALUES (:writtenBy, :rating, :restaurantId, :content, :createdat)";
         try (Connection con = sql2o.open()){
             int id = (int) con.createQuery(sql)
                     .bind(review)
@@ -58,5 +60,26 @@ public class Sql2oReviewDao implements ReviewDao{
         } catch (Sql2oException ex) {
             System.out.println(ex);
         }
+    }
+
+    @Override
+    public List<Review> getAllReviewsByRestaurantSortedNewestToOldest(int restaurantId) {
+        List<Review> sortedReviews = getAllReviewsByRestaurant(restaurantId);
+        int swaps = 1;
+        int compared;
+
+        while (swaps != 0) {
+            swaps = 0;
+            for (int i = 0; i < (sortedReviews.size() - 1); i++) {
+                Review current = sortedReviews.get(i);
+                Review next = sortedReviews.get(i + 1);
+                compared = current.compareTo(next);
+                if (compared == -1) {
+                    Collections.swap(sortedReviews, i, i+1);
+                    swaps++;
+                }
+            }
+        }
+        return sortedReviews;
     }
 }

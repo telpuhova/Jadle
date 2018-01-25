@@ -100,6 +100,26 @@ public class Sql2oRestaurantDaoTest {
         assertEquals(restaurantDao.getAllFoodtypesForARestaurant(testRestaurant.getId()), Arrays.asList(foodtypes));
     }
 
+    @Test
+    public void deletingRestaurantAlsoUpdatesJoinTable() throws Exception {
+        Foodtype testFoodtype = new Foodtype("Seafood");
+        foodtypeDao.add(testFoodtype);
+
+        Restaurant testRestaurant = setupRestaurant();
+        restaurantDao.add(testRestaurant);
+
+        Restaurant altRestaurant = setupRestaurant();
+        restaurantDao.add(altRestaurant);
+
+        restaurantDao.addRestaurantToFoodtype(testRestaurant,testFoodtype);
+        restaurantDao.addRestaurantToFoodtype(altRestaurant, testFoodtype);
+
+        restaurantDao.deleteById(testRestaurant.getId());
+        assertEquals(0, restaurantDao.getAllFoodtypesForARestaurant(testRestaurant.getId()).size());
+
+
+    }
+
     public Restaurant setupRestaurant(){
         return new Restaurant("taco bell", "1234 ne some street, Portland, OR", "1234", "12345678", "website.com", "email@mail.com");
     }
