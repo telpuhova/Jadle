@@ -1,20 +1,20 @@
-# _Jadle_
+# Jadle
 
-#### _web application, 1/21/2018_
+web application, 1/21/2018
 
-#### By _**telpuhova & katetrahan**_
+By **telpuhova & katetrahan**
 
 ## Description
 
-_a Yelp clone._
+a Yelp clone.
 
 ## Setup
 
-* _clone repository_
-* _run App.java_
+* clone repository
+* run App.java
 
 ## Technologies Used
 
-_Java, Spark, Postgres, Handlebars_
+Java, Spark, Postgres, Handlebars
 
-Copyright (c) 2017 **_telpuhova & katetrahan_**
+Copyright (c) 2018 **telpuhova & katetrahan**
